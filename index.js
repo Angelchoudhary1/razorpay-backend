@@ -19,8 +19,8 @@ app.use(cors({
 app.use(express.json());
 
 const razorpay = new Razorpay({
-  key_id: process.env.rzp_live_RyErE379lOeYQq,
-  key_secret: process.env.HV8koI9Vi9OXSrJC1xfSppfD
+  key_id: process.env.rzp_live_RyG6HUaFJ9godF,
+  key_secret: process.env.hv6bhJywrF7J5oX0xwcaidMA
 });
 
 app.get("/", (req, res) => {
