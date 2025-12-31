@@ -1,12 +1,21 @@
-require("dotenv").config();
-
 const express = require("express");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
-app.use(cors());
+
+// ✅ CORS FIX (IMPORTANT)
+app.use(cors({
+  origin: [
+    "https://choeducationandtrust.org",
+    "https://choeducationandtrust.netlify.app"
+  ],
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"]
+}));
+
 app.use(express.json());
 
 const razorpay = new Razorpay({
@@ -19,28 +28,19 @@ app.get("/", (req, res) => {
 });
 
 app.post("/create-order", async (req, res) => {
-  const { amount } = req.body;
+  try {
+    const { amount } = req.body;
 
-  const order = await razorpay.orders.create({
-    amount: amount * 100,
-    currency: "INR",
-    receipt: "donation_" + Date.now()
-  });
+    const order = await razorpay.orders.create({
+      amount: amount * 100,
+      currency: "INR",
+      receipt: "donation_" + Date.now()
+    });
 
-  res.json(order);
-});
-
-app.post("/verify-payment", (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-
-  const body = razorpay_order_id + "|" + razorpay_payment_id;
-
-  const expected = crypto
-    .createHmac("sha256", process.env.RAZORPAY_SECRET)
-    .update(body)
-    .digest("hex");
-
-  res.json({ success: expected === razorpay_signature });
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 const PORT = process.env.PORT || 5000;
